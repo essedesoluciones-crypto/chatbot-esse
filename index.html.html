@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Esse De Soluciones — Asistente Virtual</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --naranja: #FF5C00;
+    --naranja-hover: #FF7A2F;
+    --naranja-suave: rgba(255,92,0,0.10);
+    --negro: #0A0A0A;
+    --gris-oscuro: #141414;
+    --gris-medio: #1E1E1E;
+    --gris-borde: rgba(255,255,255,0.07);
+    --blanco: #F5F3EF;
+    --blanco-suave: rgba(245,243,239,0.5);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: var(--negro); color: var(--blanco);
+    font-family: 'DM Sans', sans-serif;
+    height: 100vh; display: flex; flex-direction: column; overflow: hidden;
+  }
+
+  /* HEADER */
+  header {
+    background: rgba(10,10,10,0.97); backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--gris-borde);
+    padding: 0 24px; height: 60px;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .logo { display: flex; align-items: center; gap: 10px; }
+  .logo-badge {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--naranja), #FF8C42);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 14px;
+    color: #fff; box-shadow: 0 4px 12px rgba(255,92,0,0.35);
+  }
+  .logo-text { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 15px; line-height: 1.2; }
+  .logo-text span { color: var(--naranja); }
+  .logo-sub { font-size: 10px; color: var(--blanco-suave); font-family: 'DM Sans', sans-serif; letter-spacing: 0.5px; }
+  .header-right { display: flex; align-items: center; gap: 10px; }
+  .badge-online {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 11px; color: var(--blanco-suave);
+    background: var(--gris-medio); border: 1px solid var(--gris-borde);
+    border-radius: 20px; padding: 5px 12px;
+  }
+  .dot-online {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #22C55E; box-shadow: 0 0 6px #22C55E;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+  .btn-wa {
+    display: flex; align-items: center; gap: 6px;
+    background: #25D366; color: #fff;
+    font-size: 12px; font-weight: 600; font-family: 'DM Sans', sans-serif;
+    border: none; border-radius: 8px; padding: 7px 14px;
+    cursor: pointer; text-decoration: none; transition: background .2s;
+  }
+  .btn-wa:hover { background: #1ebe5a; }
+
+  /* CHAT */
+  .chat-container {
+    flex:1; overflow-y:auto; padding: 20px 16px;
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  .chat-container::-webkit-scrollbar { width:5px; }
+  .chat-container::-webkit-scrollbar-thumb { background: rgba(255,92,0,0.2); border-radius:3px; }
+
+  .msg-row { display:flex; align-items:flex-end; gap:8px; animation: fadeUp .22s ease; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+  .msg-row.user { flex-direction: row-reverse; }
+
+  .esse-av {
+    width:34px; height:34px; border-radius:10px;
+    background: linear-gradient(135deg, var(--naranja), #FF8C42);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Syne',sans-serif; font-weight:800; font-size:13px;
+    color:#fff; flex-shrink:0; box-shadow:0 4px 10px rgba(255,92,0,0.3);
+  }
+
+  .bubble { max-width:74%; padding:12px 16px; border-radius:16px; font-size:14px; line-height:1.65; }
+  .bubble.bot { background:var(--gris-medio); border:1px solid var(--gris-borde); border-bottom-left-radius:4px; color:var(--blanco); }
+  .bubble.user { background:linear-gradient(135deg,var(--naranja),#FF7A2F); border-bottom-right-radius:4px; color:#fff; font-weight:500; }
+  .bubble strong { color:var(--naranja); }
+  .bubble.user strong { color:#fff; }
+
+  .options-grid { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+  .opt-btn {
+    background:var(--gris-oscuro); border:1px solid rgba(255,92,0,0.22);
+    color:var(--blanco); font-family:'DM Sans',sans-serif;
+    font-size:13px; padding:8px 14px; border-radius:20px;
+    cursor:pointer; transition:all .18s; text-align:left;
+  }
+  .opt-btn:hover { background:var(--naranja-suave); border-color:var(--naranja); color:var(--naranja); transform:translateY(-1px); }
+
+  .tramite-card {
+    background:var(--gris-oscuro); border:1px solid var(--gris-borde);
+    border-left:3px solid var(--naranja); border-radius:12px;
+    padding:13px 15px; margin-top:7px; cursor:pointer; transition:all .18s;
+  }
+  .tramite-card:hover { background:var(--naranja-suave); border-color:rgba(255,92,0,0.3); transform:translateY(-1px); }
+  .tc-nombre { font-size:13px; font-weight:600; color:var(--blanco); margin-bottom:6px; }
+  .tc-meta { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .tc-plataforma { font-size:10px; color:var(--blanco-suave); font-family:monospace; }
+  .tc-precio { font-size:11px; font-weight:700; color:var(--naranja); }
+  .badge-tipo { font-size:9px; letter-spacing:1px; text-transform:uppercase; padding:2px 7px; border-radius:4px; font-weight:600; }
+  .badge-gratis { background:rgba(0,200,83,0.12); color:#00C853; border:1px solid rgba(0,200,83,0.2); }
+  .badge-oficial { background:rgba(255,92,0,0.1); color:var(--naranja); border:1px solid rgba(255,92,0,0.2); }
+  .badge-plantilla { background:rgba(100,149,237,0.12); color:#6495ED; border:1px solid rgba(100,149,237,0.2); }
+
+  .detalle-box {
+    background:var(--gris-oscuro); border:1px solid rgba(255,92,0,0.2);
+    border-radius:14px; padding:16px; margin-top:8px;
+  }
+  .detalle-titulo {
+    font-family:'Syne',sans-serif; font-weight:700; font-size:15px; color:var(--blanco);
+    margin-bottom:10px; border-bottom:1px solid var(--gris-borde); padding-bottom:8px;
+  }
+  .detalle-fila { display:flex; justify-content:space-between; font-size:13px; padding:5px 0; border-bottom:1px solid rgba(255,255,255,0.04); }
+  .detalle-label { color:var(--blanco-suave); }
+  .detalle-valor { font-weight:600; color:var(--blanco); }
+  .detalle-valor.orange { color:var(--naranja); }
+  .detalle-info { font-size:12px; color:var(--blanco-suave); line-height:1.6; margin-top:10px; padding-top:8px; border-top:1px solid var(--gris-borde); }
+  .btn-accion {
+    display:inline-flex; align-items:center; gap:6px;
+    margin-top:12px; margin-right:6px; color:#fff;
+    font-size:12px; font-weight:600; font-family:'DM Sans',sans-serif;
+    border:none; border-radius:8px; padding:8px 14px;
+    cursor:pointer; text-decoration:none; transition:background .2s;
+  }
+  .btn-accion.naranja { background:var(--naranja); }
+  .btn-accion.naranja:hover { background:var(--naranja-hover); }
+  .btn-accion.verde { background:#25D366; }
+  .btn-accion.verde:hover { background:#1ebe5a; }
+
+  /* HABEAS DATA */
+  .habeas-box {
+    background: var(--gris-oscuro);
+    border: 1px solid rgba(255,92,0,0.25);
+    border-radius: 12px; padding: 14px 16px; margin-top: 10px;
+  }
+  .habeas-titulo {
+    font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700;
+    color: var(--naranja); margin-bottom: 8px; display: flex; align-items: center; gap: 6px;
+  }
+  .habeas-texto { font-size: 11px; color: var(--blanco-suave); line-height: 1.6; margin-bottom: 12px; }
+  .habeas-texto strong { color: var(--blanco); }
+  .habeas-check-label {
+    display: flex; align-items: flex-start; gap: 10px;
+    font-size: 12px; color: var(--blanco); cursor: pointer; line-height: 1.5;
+  }
+  .habeas-check {
+    width: 18px; height: 18px; min-width: 18px;
+    border: 2px solid rgba(255,92,0,0.4); border-radius: 4px;
+    background: var(--gris-medio); appearance: none; cursor: pointer;
+    transition: all 0.18s; margin-top: 1px;
+  }
+  .habeas-check:checked { background: var(--naranja); border-color: var(--naranja); }
+  .habeas-check:checked::after { content: '✓'; display: block; color: #fff; font-size: 12px; text-align: center; line-height: 16px; }
+  .btn-habeas-continuar {
+    display: block; width: 100%; margin-top: 12px;
+    background: var(--naranja); color: #fff; font-family: 'DM Sans', sans-serif;
+    font-size: 13px; font-weight: 600; border: none; border-radius: 8px;
+    padding: 10px; cursor: pointer; transition: background .2s;
+    opacity: 0.4; pointer-events: none;
+  }
+  .btn-habeas-continuar.activo { opacity: 1; pointer-events: auto; }
+  .btn-habeas-continuar.activo:hover { background: var(--naranja-hover); }
+
+  .typing-bubble {
+    display:flex; align-items:center; gap:5px; padding:12px 16px;
+    background:var(--gris-medio); border:1px solid var(--gris-borde);
+    border-radius:16px; border-bottom-left-radius:4px; width:fit-content;
+  }
+  .typing-dot { width:7px; height:7px; border-radius:50%; background:var(--naranja); animation:tb 1.2s infinite; }
+  .typing-dot:nth-child(2){animation-delay:.2s} .typing-dot:nth-child(3){animation-delay:.4s}
+  @keyframes tb { 0%,100%{transform:translateY(0);opacity:.4} 50%{transform:translateY(-5px);opacity:1} }
+
+  .input-area {
+    border-top:1px solid var(--gris-borde); background:var(--gris-oscuro);
+    padding:12px 16px; display:flex; gap:10px; align-items:flex-end; flex-shrink:0;
+    padding-bottom:calc(16px + env(safe-area-inset-bottom, 20px));
+    margin-bottom: 0;
+  }
+  .input-wrap {
+    flex:1; background:var(--gris-medio); border:1px solid var(--gris-borde);
+    border-radius:12px; display:flex; align-items:center; padding:0 14px; transition:border-color .2s;
+  }
+  .input-wrap:focus-within { border-color:rgba(255,92,0,0.35); }
+  #user-input {
+    flex:1; background:none; border:none; outline:none;
+    color:var(--blanco); font-family:'DM Sans',sans-serif;
+    font-size:14px; padding:12px 0; resize:none; max-height:100px; overflow-y:auto; line-height:1.4;
+  }
+  #user-input::placeholder { color:var(--blanco-suave); }
+  #send-btn {
+    width:44px; height:44px; border-radius:10px; background:var(--naranja);
+    border:none; cursor:pointer; display:flex; align-items:center; justify-content:center;
+    font-size:17px; transition:all .18s; flex-shrink:0; box-shadow:0 4px 12px rgba(255,92,0,0.3);
+  }
+  #send-btn:hover { background:var(--naranja-hover); transform:scale(1.05); }
+  #send-btn:disabled { background:var(--gris-medio); box-shadow:none; cursor:not-allowed; transform:none; }
+
+  .aviso-strip {
+    font-size:10px; text-align:center; color:var(--blanco-suave);
+    padding:5px 16px; background:var(--negro);
+    border-top:1px solid var(--gris-borde); flex-shrink:0; line-height:1.5;
+    display: none;
+  }
+  .aviso-strip em { color:rgba(255,92,0,0.6); font-style:normal; }
+
+  @media(max-width:480px){
+    .bubble{max-width:88%} .logo-sub{display:none} header{padding:0 14px}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-badge">E.</div>
+    <div>
+      <div class="logo-text">Esse<span>.</span> De Soluciones</div>
+      <div class="logo-sub">Trámites Gubernamentales · Envigado</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="badge-online"><div class="dot-online"></div>Esse en línea</div>
+    <a class="btn-wa" href="https://wa.me/573012669915?text=Hola,%20deseo%20gestionar%20un%20trámite%20con%20Esse%20De%20Soluciones." target="_blank">📲 WhatsApp</a>
+  </div>
+</header>
+
+<div class="chat-container" id="chat"></div>
+
+<div class="input-area">
+  <div class="input-wrap">
+    <textarea id="user-input" placeholder="Escríbale a Esse su consulta…" rows="1"></textarea>
+  </div>
+  <button id="send-btn" onclick="enviarMensaje()">➤</button>
+</div>
+
+<div class="aviso-strip">
+  <em>ℹ</em> Los costos oficiales son pagados directamente por el cliente. Este asistente brinda orientación, no asesoría jurídica.
+</div>
+
+<script>
+const WA = "573012669915";
+
+const tramites = {
+  certificados:{label:"🏛️ Certificados y Antecedentes",items:[
+    {nombre:"Certificado Tradición y Libertad · SNR",url:"https://certificados.supernotariado.gov.co",plataforma:"supernotariado.gov.co",oficial:23200,gestion:6000,tipo:"oficial",info:"Necesita el número de matrícula inmobiliaria (está en el recibo del predial o escritura). El certificado llega al correo en minutos."},
+    {nombre:"Certificado Existencia y Representación · Cámara de Comercio",url:"https://tramites.camaramedellin.com.co/",plataforma:"camaramedellin.com.co",oficial:4600,gestion:5000,tipo:"oficial",info:"Necesita el NIT o nombre exacto de la empresa. Por folio $4.600. Llega inmediatamente al correo."},
+    {nombre:"Certificado Matrícula Mercantil",url:"https://tramites.camaramedellin.com.co/",plataforma:"camaramedellin.com.co",oficial:4600,gestion:5000,tipo:"oficial",info:"Para personas naturales comerciantes. Necesita el número de matrícula o nombre."},
+    {nombre:"Antecedentes disciplinarios · Procuraduría",url:"https://www.procuraduria.gov.co/Pages/Consulta-de-Antecedentes.aspx",plataforma:"procuraduria.gov.co",oficial:0,gestion:5000,tipo:"gratis",info:"Solo necesita el número de cédula del consultado. Resultado inmediato. Completamente gratuito."},
+    {nombre:"Antecedentes fiscales · Contraloría",url:"https://www.contraloria.gov.co/web/guest/antecedentes-fiscales",plataforma:"contraloria.gov.co",oficial:0,gestion:5000,tipo:"gratis",info:"Solo necesita número de cédula o NIT. Gratuito y resultado inmediato."},
+    {nombre:"Antecedentes judiciales · Policía Nacional",url:"https://antecedentes.policia.gov.co:7005/WebJudicial",plataforma:"policia.gov.co",oficial:0,gestion:5000,tipo:"gratis",info:"Solo necesita número de cédula. Completamente gratuito y resultado en segundos."},
+    {nombre:"Certificado REDAM (deudores alimentarios)",url:"https://www.icbf.gov.co/redam",plataforma:"icbf.gov.co",oficial:0,gestion:5000,tipo:"gratis",info:"Registro de Deudores Alimentarios Morosos. Necesita número de cédula. Gratuito."},
+    {nombre:"Renovación Matrícula Mercantil",url:"https://tramites.camaramedellin.com.co/",plataforma:"camaramedellin.com.co",oficial:0,gestion:7000,tipo:"oficial",info:"Obligatoria entre enero y marzo. El valor varía según activos. Se orienta y gestiona el proceso completo."},
+  ]},
+  dian:{label:"📊 DIAN — Impuestos y Facturación",items:[
+    {nombre:"Consulta y descarga RUT",url:"https://www.dian.gov.co/impuestos/RUT/Paginas/Consultas-RUT.aspx",plataforma:"dian.gov.co",oficial:0,gestion:5000,tipo:"gratis",info:"Necesita número de cédula o NIT. Completamente gratuito. Descarga inmediata en PDF."},
+    {nombre:"Actualización datos RUT",url:"https://www.dian.gov.co/impuestos/RUT/Paginas/Consultas-RUT.aspx",plataforma:"dian.gov.co",oficial:0,gestion:6000,tipo:"gratis",info:"Se puede actualizar dirección, actividad económica, responsabilidades tributarias y más. Gratuito."},
+    {nombre:"Habilitación facturación electrónica",url:"https://www.dian.gov.co/impuestos/RUT/Paginas/Consultas-RUT.aspx",plataforma:"dian.gov.co",oficial:0,gestion:7000,tipo:"gratis",info:"Para personas naturales y jurídicas obligadas. Proceso guiado paso a paso. Gratuito en DIAN."},
+    {nombre:"Declaración de renta (persona natural)",url:"https://www.dian.gov.co/impuestos/RUT/Paginas/Consultas-RUT.aspx",plataforma:"dian.gov.co",oficial:0,gestion:15000,tipo:"gratis",info:"Orientación y diligenciamiento del formulario 210 o 110. Para personas con ingresos moderados sin actividad compleja."},
+    {nombre:"Impuesto predial Envigado",url:"https://www.dian.gov.co/impuestos/RUT/Paginas/Consultas-RUT.aspx",plataforma:"dian.gov.co",oficial:0,gestion:5000,tipo:"gratis",info:"Consulta, liquidación y pago del predial municipal. El cliente paga el valor del impuesto. Gestión $5.000."},
+  ]},
+  salud:{label:"🏥 EPS y Salud",items:[
+    {nombre:"Trámites y solicitudes · Savia Salud EPS",url:"https://www.saviasaludeps.com/sitioweb/solicitudes-y-tr%C3%A1mites2",plataforma:"saviasaludeps.com",oficial:0,gestion:5000,tipo:"gratis",info:"Portal de trámites y solicitudes en línea de Savia Salud EPS. Certificados, autorizaciones, afiliaciones y más."},
+    {nombre:"Trámites y servicios · Nueva EPS",url:"https://www.nuevaeps.com.co/personas/tramites-servicios",plataforma:"nuevaeps.com.co",oficial:0,gestion:5000,tipo:"gratis",info:"Portal de personas de Nueva EPS. Agendamiento, certificados, autorizaciones y demás servicios en línea."},
+    {nombre:"Portal de servicios · EPS Sura",url:"https://www.epssura.com/",plataforma:"epssura.com",oficial:0,gestion:5000,tipo:"gratis",info:"Portal principal de EPS Sura. Certificados de afiliación, citas médicas, autorizaciones y trámites en línea."},
+    {nombre:"Transcripción de incapacidades · Sura",url:"https://www.epssura.com/transcribir-incapacidad",plataforma:"epssura.com",oficial:0,gestion:6000,tipo:"gratis",info:"Transcripción de incapacidades médicas ante EPS Sura. Se requiere el documento físico de incapacidad."},
+  ]},
+  pensiones:{label:"👴 Pensiones y Fondos",items:[
+    {nombre:"Colilla de pago · Colpensiones",url:"https://sede.colpensiones.gov.co",plataforma:"sede.colpensiones.gov.co",oficial:0,gestion:5000,tipo:"gratis",info:"Necesita número de cédula del pensionado. Descarga inmediata. Muy demandado por adultos mayores."},
+    {nombre:"Historia laboral · Colpensiones",url:"https://sede.colpensiones.gov.co",plataforma:"sede.colpensiones.gov.co",oficial:0,gestion:5000,tipo:"gratis",info:"Semanas cotizadas, empleadores y periodos. Necesita cédula. Gratuito y descarga inmediata."},
+    {nombre:"Semanas cotizadas · Colpensiones",url:"https://sede.colpensiones.gov.co",plataforma:"sede.colpensiones.gov.co",oficial:0,gestion:5000,tipo:"gratis",info:"Consulta de semanas cotizadas en el sistema de pensiones. Necesita cédula."},
+    {nombre:"Colilla de pago · CASUR (Policía)",url:"https://www.casur.gov.co",plataforma:"casur.gov.co",oficial:0,gestion:5000,tipo:"gratis",info:"Para pensionados de la Policía Nacional. Necesita cédula y número de resolución pensional."},
+    {nombre:"Colilla de pago · CREMIL (Militares)",url:"https://www.cremil.gov.co",plataforma:"cremil.gov.co",oficial:0,gestion:5000,tipo:"gratis",info:"Para pensionados de las Fuerzas Militares. Necesita cédula y número de pensión."},
+    {nombre:"Colilla de pago · FOMAG (Docentes)",url:"https://www.fiduprevisora.com.co",plataforma:"fiduprevisora.com.co",oficial:0,gestion:5000,tipo:"gratis",info:"Para docentes pensionados del magisterio. Necesita cédula y número de nómina."},
+    {nombre:"Colilla de pago · FOPEP",url:"https://www.fopep.gov.co",plataforma:"fopep.gov.co",oficial:0,gestion:5000,tipo:"gratis",info:"Fondo de Pensiones Públicas. Para pensionados del sector público. Necesita cédula."},
+    {nombre:"Colilla de pago · Humano en Línea",url:"https://www.humanoenlinea.com.co",plataforma:"humanoenlinea.com.co",oficial:0,gestion:5000,tipo:"gratis",info:"Para pensionados administrados por Humano. Necesita cédula y número de cuenta."},
+    {nombre:"Trámites Colfondos",url:"https://www.colfondos.com.co/dxp/",plataforma:"colfondos.com.co",oficial:0,gestion:5000,tipo:"gratis",info:"Portal de trámites y servicios en línea de Colfondos. Certificados, consultas y gestiones del fondo de pensiones."},
+  ]},
+  sisben:{label:"📋 SISBEN y Subsidios",items:[
+    {nombre:"Consulta puntaje SISBEN",url:"https://www.sisben.gov.co/sisben/Paginas/consulta-tu-grupo.aspx",plataforma:"sisben.gov.co",oficial:0,gestion:5000,tipo:"gratis",info:"Consulta el grupo y puntaje SISBEN con número de cédula. Resultado inmediato. Completamente gratuito."},
+    {nombre:"Solicitud cita actualización SISBEN",url:"https://www.envigado.gov.co/sisben",plataforma:"sisben.gov.co / municipio",oficial:0,gestion:5000,tipo:"gratis",info:"Para actualizar datos del núcleo familiar. Se agenda cita en la alcaldía o mediante portal."},
+    {nombre:"Consulta estado subsidios (Familias en Acción)",url:"https://www.prosperidadsocial.gov.co/ent/gen/Paginas/Consulta-Beneficiarios.aspx",plataforma:"dps.gov.co",oficial:0,gestion:5000,tipo:"gratis",info:"Consulta si está activo como beneficiario de Familias en Acción, Colombia Mayor u otros programas."},
+    {nombre:"Consulta Subsidio Colombia Mayor",url:"https://prosperidadsocial.gov.co/?s=cronograma",plataforma:"prosperidadsocial.gov.co",oficial:0,gestion:5000,tipo:"gratis",info:"Consulta cronogramas y pagos del subsidio Colombia Mayor. Para adultos mayores beneficiarios del programa."},
+  ]},
+  movilidad:{label:"🚗 Movilidad — Valle de Aburrá",items:[
+    {nombre:"Consulta estado vehículo · RUNT",url:"https://www.runt.gov.co/",plataforma:"runt.gov.co",oficial:0,gestion:5000,tipo:"gratis",info:"Propietario actual, limitaciones, SOAT, revisión técnica y comparendos. Solo necesita la placa."},
+    {nombre:"Descarga licencia de conducción digital",url:"https://www.runt.gov.co/",plataforma:"runt.gov.co",oficial:0,gestion:5000,tipo:"gratis",info:"Licencia digital oficial válida. Necesita cédula y número de licencia. Descarga inmediata."},
+    {nombre:"Consulta y pago comparendos · SIMIT",url:"https://www.fcm.org.co/simit",plataforma:"fcm.org.co/simit",oficial:0,gestion:5000,tipo:"gratis",info:"Consulta de infracciones de tránsito a nivel nacional. El cliente paga el valor de la multa. Gestión $5.000."},
+    {nombre:"Consulta fotodetecciones Medellín",url:"https://www.medellin.gov.co/movilidadenlinea",plataforma:"medellin.gov.co",oficial:0,gestion:5000,tipo:"gratis",info:"Consulta de fotomultas y fotodetecciones registradas en Medellín. Necesita placa o cédula."},
+    {nombre:"Pago multas Secretaría Movilidad Medellín",url:"https://www.medellin.gov.co/movilidadenlinea",plataforma:"medellin.gov.co",oficial:0,gestion:5000,tipo:"gratis",info:"Pago de comparendos y multas de tránsito de Medellín. El cliente paga el valor de la multa."},
+    {nombre:"Agendamiento cita Movilidad Medellín",url:"https://www.medellin.gov.co/movilidadenlinea",plataforma:"medellin.gov.co",oficial:0,gestion:6000,tipo:"gratis",info:"Agendamiento de citas para trámites en Secretaría de Movilidad de Medellín."},
+    {nombre:"Movilidad Envigado — consultas y trámites",url:"https://movilidad.envigado.gov.co/portal-servicios/#/public",plataforma:"movilidad.envigado.gov.co",oficial:0,gestion:5000,tipo:"gratis",info:"Trámites de tránsito y movilidad del municipio de Envigado. Consultas, pagos y agendamientos."},
+    {nombre:"Orientación trámite licencia de conducción",url:"https://www.runt.gov.co/",plataforma:"runt.gov.co · presencial",oficial:0,gestion:8000,tipo:"gratis",info:"Orientación completa sobre requisitos, documentos, centros de reconocimiento y pasos. Trámite final presencial."},
+    {nombre:"Orientación duplicado de placas",url:"https://www.runt.gov.co/",plataforma:"runt.gov.co · presencial",oficial:0,gestion:8000,tipo:"gratis",info:"Orientación sobre requisitos y proceso. Trámite final requiere presencia en CDA autorizado."},
+  ]},
+  pagos:{label:"💳 Pagos y Servicios Públicos",items:[
+    {nombre:"Pago EPM (luz, agua, gas)",url:"https://www.epm.com.co/site/clientes-y-usuarios/pago-de-facturas",plataforma:"epm.com.co",oficial:0,gestion:5000,tipo:"gratis",info:"El cliente paga el valor de su factura. Gestión Esse $5.000. Comprobante inmediato."},
+    {nombre:"Pago internet y televisión",url:"https://www.epm.com.co",plataforma:"Portal operador correspondiente",oficial:0,gestion:5000,tipo:"gratis",info:"Claro, Tigo, ETB, Une y demás operadores. El cliente paga el valor de la factura."},
+    {nombre:"Pago cuotas crédito y obligaciones",url:"https://www.bancolombia.com",plataforma:"Portal entidad financiera",oficial:0,gestion:5000,tipo:"gratis",info:"Bancos, cooperativas, Bancolombia, Davivienda, etc. El cliente paga el valor de la cuota."},
+    {nombre:"Recarga Nequi / Daviplata",url:"https://www.nequi.com.co",plataforma:"nequi.com.co / daviplata",oficial:0,gestion:3000,tipo:"gratis",info:"Recarga rápida para clientes sin smartphone o sin manejo de apps. Gestión mínima $3.000."},
+    {nombre:"Impuesto predial (otros municipios)",url:"https://www.medellin.gov.co/hacienda",plataforma:"Portal municipio correspondiente",oficial:0,gestion:5000,tipo:"gratis",info:"Medellín, Itagüí, Bello, Sabaneta, La Estrella, Caldas, Copacabana, Girardota, Barbosa."},
+  ]},
+  plantillas:{label:"📝 Plantillas y Documentos Legales",items:[
+    {nombre:"Derecho de petición (redacción personalizada)",url:"#plantilla-derecho",plataforma:"Plantilla Word · descarga inmediata",oficial:0,gestion:12000,tipo:"plantilla",info:"Plantilla lista para diligenciar. Se genera y descarga directamente como archivo Word. Aplica para cualquier entidad."},
+    {nombre:"Contrato de arrendamiento",url:"#plantilla-contrato",plataforma:"Plantilla Word · descarga inmediata",oficial:0,gestion:15000,tipo:"plantilla",info:"Plantilla legal lista para diligenciar. Válida para vivienda y local comercial. Descarga inmediata como archivo Word."},
+    {nombre:"Carta laboral / certificación laboral",url:"#plantilla-laboral",plataforma:"3 plantillas Word · descarga inmediata",oficial:0,gestion:8000,tipo:"plantilla",info:"Elige entre: Certificación Laboral, Carta de Recomendación o Certificado de Terminación Laboral."},
+    {nombre:"Acción de Tutela",url:"#plantilla-tutela",plataforma:"Plantilla Word · descarga inmediata",oficial:0,gestion:30000,tipo:"plantilla",info:"Plantilla completa para proteger derechos fundamentales. Art. 86 Constitución Política."},
+    {nombre:"Denuncia Penal",url:"#plantilla-denuncia",plataforma:"Plantilla Word · descarga inmediata",oficial:0,gestion:30000,tipo:"plantilla",info:"Para reportar delitos ante la Fiscalía o Policía. Ley 906 de 2004."},
+    {nombre:"Querella",url:"#plantilla-querella",plataforma:"Plantilla Word · descarga inmediata",oficial:0,gestion:30000,tipo:"plantilla",info:"Para delitos querellables: injuria, calumnia, daño en bien ajeno, perturbación de la posesión, entre otros."},
+    {nombre:"Demanda Pequeñas Causas",url:"#plantilla-pequenas",plataforma:"Plantilla Word · descarga inmediata",oficial:0,gestion:30000,tipo:"plantilla",info:"Para reclamar deudas e incumplimientos de hasta 40 SMLMV. Proceso verbal sumario."},
+    {nombre:"Contrato de Prestación de Servicios",url:"#plantilla-prestacion",plataforma:"Plantilla Word · descarga inmediata",oficial:0,gestion:30000,tipo:"plantilla",info:"Contrato entre contratante y contratista independiente. No genera vínculo laboral."},
+  ]},
+  registraduria:{label:"🪪 Registraduría Nacional",items:[
+    {nombre:"Cédula de ciudadanía (primera vez)",url:"https://www.registraduria.gov.co/-Cedula-de-ciudadania-.html",plataforma:"registraduria.gov.co",oficial:0,gestion:5000,tipo:"gratis",info:"Trámite presencial en cualquier Registraduría. Gratuito. Se atiende en orden de llegada. La nueva cédula es digital en policarbonato."},
+    {nombre:"Renovación / corrección de cédula",url:"https://www.registraduria.gov.co/-Cedula-de-ciudadania-.html",plataforma:"registraduria.gov.co",oficial:0,gestion:5000,tipo:"gratis",info:"Para actualizar foto, corregir datos o renovar cédula deteriorada. El duplicado tiene costo. Consultar tarifas vigentes."},
+    {nombre:"Tarjeta de identidad",url:"https://www.registraduria.gov.co/-Tramites-de-la-Tarjeta-de-identidad-.html",plataforma:"registraduria.gov.co",oficial:0,gestion:5000,tipo:"gratis",info:"Para menores entre 7 y 17 años. Primera vez gratuita. Requiere registro civil y acompañamiento del acudiente."},
+    {nombre:"Registro civil de nacimiento",url:"https://www.registraduria.gov.co/-Registro-Civil-e-Identificacion-798-.html",plataforma:"registraduria.gov.co",oficial:0,gestion:5000,tipo:"gratis",info:"Para inscribir un recién nacido. Gratuito si se hace dentro del mes siguiente al nacimiento."},
+    {nombre:"Registro civil de matrimonio",url:"https://www.registraduria.gov.co/-Registro-Civil-e-Identificacion-798-.html",plataforma:"registraduria.gov.co",oficial:0,gestion:5000,tipo:"gratis",info:"Para inscribir un matrimonio civil o religioso. Se tramita en la Registraduría o notaría del lugar de la ceremonia."},
+    {nombre:"Registro civil de defunción",url:"https://www.registraduria.gov.co/-Registro-Civil-e-Identificacion-798-.html",plataforma:"registraduria.gov.co",oficial:0,gestion:5000,tipo:"gratis",info:"Obligatorio para reportar el fallecimiento de una persona. Requiere certificado médico de defunción."},
+    {nombre:"Duplicado de registro civil",url:"https://www.registraduria.gov.co/-Registro-Civil-e-Identificacion-798-.html",plataforma:"registraduria.gov.co",oficial:0,gestion:5000,tipo:"gratis",info:"Para obtener copia del registro civil de nacimiento, matrimonio o defunción. Consultar tarifas vigentes."},
+    {nombre:"Inscripción en el censo electoral",url:"https://www.registraduria.gov.co/-Inscripcion-de-ciudadanos-1739-.html",plataforma:"registraduria.gov.co",oficial:0,gestion:5000,tipo:"gratis",info:"Para inscribir la cédula y poder votar en un municipio. Trámite presencial en sedes de la Registraduría."},
+  ]},
+};
+
+const indice = [];
+Object.entries(tramites).forEach(([cat,data]) => {
+  data.items.forEach((item,idx) => {
+    indice.push({...item, cat, idx, search:(item.nombre+' '+item.info+' '+item.plataforma).toLowerCase()});
+  });
+});
+
+const SYSTEM = `Eres Esse, el asistente virtual de Esse De Soluciones, empresa colombiana de trámites gubernamentales ubicada en Envigado, Antioquia.
+
+IDENTIDAD: Tu nombre es Esse. Formal, cordial, eficiente. Tratas al usuario de "usted" salvo que él use "tú".
+
+AVISOS (menciona cuando aplique):
+- Los costos oficiales los paga directamente el cliente. Esse cobra solo la gestión.
+- Este asistente brinda orientación, no asesoría jurídica.
+- Para trámites complejos, recomienda contactar por WhatsApp.
+
+PRECIOS EXACTOS DE GESTIÓN ESSE:
+Certificados y antecedentes: $5.000 (Tradición y Libertad: $6.000 gestión + $23.200 oficial).
+Renovación Matrícula Mercantil: $7.000.
+DIAN – RUT consulta: $5.000. RUT actualización: $6.000. Facturación electrónica: $7.000. Renta persona natural: $15.000. Predial: $5.000.
+EPS trámites: $5.000. Incapacidades Sura: $6.000.
+Pensiones y fondos: $5.000.
+SISBEN y subsidios: $5.000.
+Movilidad consultas: $5.000. Agendamiento movilidad: $6.000. Orientación licencia/placas: $8.000.
+Pagos EPM/internet/créditos: $5.000. Nequi/Daviplata: $3.000.
+Registraduría (todos los trámites): $5.000.
+Plantillas: Derecho de petición: $12.000. Arrendamiento: $15.000. Carta laboral: $8.000. Tutela/Denuncia/Querella/Pequeñas causas/Prestación servicios: $30.000.
+Responde siempre en español formal.`;
+
+const historial = [];
+const chat = document.getElementById('chat');
+const inputEl = document.getElementById('user-input');
+
+function fmt(n){ return '$'+n.toLocaleString('es-CO'); }
+function tipoH(t){ return t==='gratis'?'<span class="badge-tipo badge-gratis">Gratuito</span>':t==='plantilla'?'<span class="badge-tipo badge-plantilla">Plantilla</span>':'<span class="badge-tipo badge-oficial">Costo oficial</span>'; }
+
+function addMsg(role, html){
+  const row = document.createElement('div');
+  row.className = 'msg-row '+role;
+  row.innerHTML = role==='bot'
+    ? `<div class="esse-av">E.</div><div class="bubble bot">${html}</div>`
+    : `<div class="bubble user">${html}</div>`;
+  chat.appendChild(row);
+  chat.scrollTop = chat.scrollHeight;
+  return row;
+}
+function showTyping(){ const r=document.createElement('div'); r.className='msg-row bot'; r.id='typ'; r.innerHTML=`<div class="esse-av">E.</div><div class="typing-bubble"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>`; chat.appendChild(r); chat.scrollTop=chat.scrollHeight; }
+function hideTyping(){ const e=document.getElementById('typ'); if(e)e.remove(); }
+
+function mostrarMenu(){
+  let h='Seleccione la categoría que necesita, o escríbame directamente su consulta:<div class="options-grid">';
+  Object.entries(tramites).forEach(([k,d])=>{ h+=`<button class="opt-btn" onclick="selCat('${k}')">${d.label}</button>`; });
+  h+=`<button class="opt-btn" onclick="irWA('')">📋 Solicitar asesoría</button></div>`;
+  addMsg('bot',h);
+}
+
+function selCat(cat){
+  const d=tramites[cat];
+  addMsg('user',d.label);
+  let h=`Servicios en <strong>${d.label}</strong>. Seleccione el trámite para ver detalles:`;
+  d.items.forEach((item,idx)=>{
+    h+=`<div class="tramite-card" onclick="verDetalle('${cat}',${idx})">
+      <div class="tc-nombre">${item.nombre}</div>
+      <div class="tc-meta"><span class="tc-plataforma">${item.plataforma}</span>${tipoH(item.tipo)}<span class="tc-precio">Gestión: ${fmt(item.gestion)}</span></div>
+    </div>`;
+  });
+  h+=`<div class="options-grid"><button class="opt-btn" onclick="volver()">← Volver al menú</button></div>`;
+  addMsg('bot',h);
+}
+
+function verDetalle(cat,idx){
+  const t=tramites[cat].items[idx];
+  const total=t.oficial+t.gestion;
+  addMsg('user',t.nombre);
+  let h=`<div class="detalle-box">
+    <div class="detalle-titulo">${t.nombre}</div>
+    <div class="detalle-fila"><span class="detalle-label">Plataforma</span><span class="detalle-valor">${t.plataforma}</span></div>
+    <div class="detalle-fila"><span class="detalle-label">Costo oficial</span><span class="detalle-valor">${t.oficial===0?'Gratuito':fmt(t.oficial)}</span></div>
+    <div class="detalle-fila"><span class="detalle-label">Gestión Esse</span><span class="detalle-valor orange">${fmt(t.gestion)}</span></div>
+    <div class="detalle-fila"><span class="detalle-label">Total cliente</span><span class="detalle-valor orange">${fmt(total)}</span></div>
+    <div class="detalle-info">${t.info}</div>
+    <button class="btn-accion naranja" style="margin-top:12px;" onclick="mostrarHabeasData('${cat}',${idx})">📋 Solicitar este trámite</button>
+  </div>
+  <div class="options-grid"><button class="opt-btn" onclick="volver()">← Volver al menú</button></div>`;
+  addMsg('bot',h);
+}
+
+// ── HABEAS DATA ───────────────────────────────────────
+let flujo = null;
+let pendienteCat = null;
+let pendienteIdx = null;
+
+function mostrarHabeasData(cat, idx){
+  pendienteCat = cat;
+  pendienteIdx = idx;
+  const hid = 'hb_' + Date.now();
+  const bid = 'btn_' + Date.now();
+  const html = `
+    <div class="habeas-box">
+      <div class="habeas-titulo">🔒 Autorización Tratamiento de Datos — Ley 1581 de 2012</div>
+      <div class="habeas-texto">
+        De conformidad con la <strong>Ley Estatutaria 1581 de 2012</strong> y el <strong>Decreto 1377 de 2013</strong>, <strong>Esse De Soluciones</strong> le informa que los datos suministrados serán utilizados exclusivamente para la gestión del trámite solicitado y no serán compartidos con terceros sin su consentimiento.<br><br>
+        Usted tiene derecho a conocer, actualizar, rectificar o suprimir su información en cualquier momento.
+      </div>
+      <label class="habeas-check-label">
+        <input type="checkbox" class="habeas-check" id="${hid}" onchange="toggleHabeas('${hid}','${bid}')">
+        Autorizo a Esse De Soluciones el tratamiento de mis datos personales para la gestión de este trámite, conforme a la Ley 1581 de 2012.
+      </label>
+      <button class="btn-habeas-continuar" id="${bid}" onclick="confirmarHabeas()">
+        ✅ Aceptar y continuar
+      </button>
+    </div>`;
+  addMsg('bot', html);
+}
+
+function toggleHabeas(checkId, btnId){
+  const cb = document.getElementById(checkId);
+  const btn = document.getElementById(btnId);
+  if(cb && btn) btn.classList.toggle('activo', cb.checked);
+}
+
+function confirmarHabeas(){
+  addMsg('user', '✅ Autorizo el tratamiento de mis datos personales');
+  iniciarFlujo(pendienteCat, pendienteIdx);
+}
+
+// ── FLUJO GENÉRICO REUTILIZABLE ───────────────────────
+function flujoSimple(t, pasos, confirmar, aviso){
+  flujo = { tramite: t, datos: {}, etapa: 0, pasos, confirmar, aviso };
+  siguientePaso();
+}
+
+function flujoConCedula(t, extraPasos, confirmarFn, avisoFn){
+  const pasos = [
+    { campo: 'cedula', pregunta: '¿Cuál es el <strong>número de cédula</strong> a consultar?' },
+    { campo: 'correo', pregunta: '¿A qué <strong>correo electrónico</strong> le enviamos el resultado? ¿O prefiere recibirlo por este <strong>WhatsApp</strong>?' },
+    ...extraPasos
+  ];
+  flujoSimple(t, pasos, confirmarFn, avisoFn);
+}
+
+function avisoEntrega(t, d, docNombre){
+  const porWA = /whatsapp|whats|ws|acá|aca|aquí|aqui|este|por acá|por aquí|por aqui/i.test(d.correo||'');
+  const canal = porWA ? `directamente por este <strong>WhatsApp</strong>` : `al correo <strong>${d.correo}</strong>`;
+  const costo = t.oficial > 0
+    ? `Costo total: <strong>${fmt(t.oficial + t.gestion)}</strong> (oficial ${fmt(t.oficial)} + gestión Esse ${fmt(t.gestion)}).`
+    : `Costo gestión Esse: <strong>${fmt(t.gestion)}</strong>.`;
+  return `✅ ¡Perfecto! En un máximo de <strong>30 minutos</strong> le enviamos ${docNombre} ${canal}, salvo interrupciones en las plataformas oficiales.<br><br>${costo}`;
+}
+
+function iniciarFlujo(cat, idx){
+  const t = tramites[cat].items[idx];
+
+  // ── CERTIFICADOS ──
+  if(cat==='certificados' && idx===0){
+    flujoSimple(t,[
+      {campo:'matricula', pregunta:'¿Cuál es el <strong>número de matrícula inmobiliaria</strong> de la propiedad?'},
+      {campo:'lugar',     pregunta:'¿En qué <strong>departamento y municipio</strong> está registrada la propiedad?'},
+      {campo:'correo',    pregunta:'¿A qué <strong>correo electrónico</strong> le enviamos el certificado? ¿O prefiere recibirlo por este <strong>WhatsApp</strong>?'},
+    ],
+    d=>`📋 *Certificado de Tradición y Libertad*\n• Matrícula: ${d.matricula}\n• Lugar: ${d.lugar}\n• Entrega: ${d.correo}`,
+    d=>avisoEntrega(t,d,'su certificado'));
+
+  } else if(cat==='certificados' && idx===1){
+    flujoSimple(t,[
+      {campo:'nit',    pregunta:'¿Cuál es el <strong>NIT o nombre exacto</strong> de la empresa?'},
+      {campo:'correo', pregunta:'¿A qué <strong>correo electrónico</strong> le enviamos el certificado? ¿O prefiere recibirlo por este <strong>WhatsApp</strong>?'},
+    ],
+    d=>`📋 *Certificado Existencia y Representación*\n• NIT / Empresa: ${d.nit}\n• Entrega: ${d.correo}`,
+    d=>avisoEntrega(t,d,'su certificado'));
+
+  } else if(cat==='certificados' && idx===2){
+    flujoSimple(t,[
+      {campo:'cedula_nit', pregunta:'¿Cuál es su <strong>número de cédula o NIT</strong>?'},
+      {campo:'correo',     pregunta:'¿A qué <strong>correo electrónico</strong> le enviamos el certificado? ¿O prefiere recibirlo por este <strong>WhatsApp</strong>?'},
+    ],
+    d=>`📋 *Certificado Matrícula Mercantil*\n• Cédula / NIT: ${d.cedula_nit}\n• Entrega: ${d.correo}`,
+    d=>avisoEntrega(t,d,'su certificado'));
+
+  } else if(cat==='certificados' && (idx===3||idx===4||idx===5||idx===6)){
+    flujoSimple(t,[
+      {campo:'cedula', pregunta:'¿Cuál es el <strong>número de cédula</strong> a consultar?'},
+      {campo:'correo', pregunta:'¿A qué <strong>correo electrónico</strong> le enviamos el resultado? ¿O prefiere recibirlo por este <strong>WhatsApp</strong>?'},
+    ],
+    d=>`📋 *${t.nombre}*\n• Cédula: ${d.cedula}\n• Entrega: ${d.correo}`,
+    d=>avisoEntrega(t,d,'el resultado'));
+
+  } else if(cat==='certificados' && idx===7){
+    flujoSimple(t,[
+      {campo:'nit_cedula', pregunta:'¿Cuál es su <strong>NIT</strong> (empresa) o <strong>cédula</strong> (persona natural comerciante)?'},
+      {campo:'correo',     pregunta:'¿A qué <strong>correo electrónico</strong> le enviamos la confirmación? ¿O prefiere recibirla por este <strong>WhatsApp</strong>?'},
+    ],
+    d=>`📋 *Renovación Matrícula Mercantil*\n• NIT / Cédula: ${d.nit_cedula}\n• Entrega: ${d.correo}`,
+    d=>avisoEntrega(t,d,'la confirmación')+'<br><br>⚠️ El valor de la renovación varía según sus activos y es pagado directamente por usted.');
+
+  // ── REGISTRADURÍA ──
+  } else if(cat==='registraduria'){
+    flujoSimple(t,[
+      {campo:'nombre',  pregunta:'¿Cuál es su <strong>nombre completo</strong>?'},
+      {campo:'cedula',  pregunta:'¿Cuál es su <strong>número de cédula</strong>?'},
+      {campo:'celular', pregunta:'¿Cuál es su <strong>número de celular</strong> para contactarle?'},
+    ],
+    d=>`📋 *${t.nombre}*\n• Nombre: ${d.nombre}\n• Cédula: ${d.cedula}\n• Celular: ${d.celular}`,
+    d=>{
+      const msg = encodeURIComponent(`📋 *${t.nombre}*\n• Nombre: ${d.nombre}\n• Cédula: ${d.cedula}\n• Celular: ${d.celular}\n\nCosto gestión: ${fmt(t.gestion)}`);
+      return `✅ ¡Perfecto! Le orientaremos paso a paso para su trámite de <strong>${t.nombre}</strong>.<br><br>Costo gestión Esse: <strong>${fmt(t.gestion)}</strong>.<br><br>Un asesor se comunicará con usted al celular indicado para coordinar:`;
+    });
+
+  // ── PENSIONES ──
+  } else if(cat==='pensiones'){
+    flujoSimple(t,[
+      {campo:'cedula', pregunta:'¿Cuál es el <strong>número de cédula</strong> del pensionado o afiliado?'},
+      {campo:'correo', pregunta:'¿A qué <strong>correo electrónico</strong> le enviamos el resultado? ¿O prefiere recibirlo por este <strong>WhatsApp</strong>?'},
+    ],
+    d=>`📋 *${t.nombre}*\n• Cédula: ${d.cedula}\n• Entrega: ${d.correo}`,
+    d=>avisoEntrega(t,d,'el documento'));
+
+  // ── SISBEN ──
+  } else if(cat==='sisben'){
+    flujoSimple(t,[
+      {campo:'cedula',  pregunta:'¿Cuál es su <strong>número de cédula</strong>?'},
+      {campo:'correo',  pregunta:'¿A qué <strong>correo electrónico</strong> le enviamos el resultado? ¿O prefiere recibirlo por este <strong>WhatsApp</strong>?'},
+    ],
+    d=>`📋 *${t.nombre}*\n• Cédula: ${d.cedula}\n• Entrega: ${d.correo}`,
+    d=>avisoEntrega(t,d,'el resultado'));
+
+  // ── PLANTILLAS LEGALES ──
+  } else if(cat==='plantillas'){
+    const docNombres = {
+      0:'su Derecho de Petición', 1:'su Contrato de Arrendamiento',
+      2:'su documento laboral', 3:'su Acción de Tutela',
+      4:'su Denuncia Penal', 5:'su Querella',
+      6:'su Demanda de Pequeñas Causas', 7:'su Contrato de Prestación de Servicios'
+    };
+    flujoSimple(t,[
+      {campo:'nombre',   pregunta:'¿Cuál es su <strong>nombre completo</strong>?'},
+      {campo:'cedula',   pregunta:'¿Cuál es su <strong>número de cédula</strong>?'},
+      {campo:'celular',  pregunta:'¿Cuál es su <strong>número de celular</strong>?'},
+      {campo:'correo',   pregunta:'¿Cómo prefiere recibir su documento? Puede indicarnos un <strong>correo electrónico</strong> o recibirlo por este <strong>WhatsApp</strong>.'},
+    ],
+    d=>`📋 *${t.nombre}*\n• Nombre: ${d.nombre}\n• Cédula: ${d.cedula}\n• Celular: ${d.celular}\n• Entrega: ${d.correo}`,
+    d=>avisoEntrega(t,d,docNombres[idx]||'el documento'));
+
+  } else {
+    // Flujo genérico — redirige a WhatsApp
+    flujo = null;
+    const msg = encodeURIComponent(`Hola, Esse De Soluciones. Deseo gestionar: *${t.nombre}*. ¿Me pueden orientar?`);
+    addMsg('bot', `Con gusto le atendemos. Escríbanos por WhatsApp y un asesor le indicará los datos requeridos para <strong>${t.nombre}</strong>:<br><br>
+      <a class="btn-accion verde" href="https://wa.me/${WA}?text=${msg}" target="_blank">📲 Escribir por WhatsApp</a>`);
+    return;
+  }
+}
+
+function siguientePaso(){
+  if(!flujo) return;
+  const paso = flujo.pasos[flujo.etapa];
+  addMsg('bot', paso.pregunta);
+}
+
+function procesarFlujo(texto){
+  if(!flujo) return false;
+  const paso = flujo.pasos[flujo.etapa];
+  flujo.datos[paso.campo] = texto;
+  flujo.etapa++;
+
+  if(flujo.etapa < flujo.pasos.length){
+    siguientePaso();
+  } else {
+    const avisoHTML = typeof flujo.aviso === 'function' ? flujo.aviso(flujo.datos) : flujo.aviso;
+    const resumen = flujo.confirmar(flujo.datos);
+    const msgWA = encodeURIComponent(`${resumen}\n\nCosto total: ${fmt(flujo.tramite.oficial + flujo.tramite.gestion)}`);
+    addMsg('bot', `${avisoHTML}<br><br>
+      <a class="btn-accion verde" href="https://wa.me/${WA}?text=${msgWA}" target="_blank">📲 Confirmar y enviar solicitud</a>`);
+    flujo = null;
+  }
+  return true;
+}
+
+function volver(){ flujo=null; addMsg('user','Volver al menú'); setTimeout(mostrarMenu,300); }
+
+function irWA(tramite){
+  addMsg('user','📲 Hablar con un asesor');
+  const msg=encodeURIComponent(tramite?`Hola, Esse De Soluciones. Deseo gestionar: *${tramite}*.`:`Hola, Esse De Soluciones. Deseo hablar con un asesor.`);
+  addMsg('bot',`Con gusto le conectamos con nuestro equipo:<br><br><a class="btn-accion verde" href="https://wa.me/${WA}?text=${msg}" target="_blank">📲 Abrir WhatsApp</a>`);
+}
+
+async function enviarAIA(texto){
+  historial.push({role:'user',content:texto});
+  showTyping();
+  document.getElementById('send-btn').disabled=true;
+  const q=texto.toLowerCase();
+  const enc=indice.filter(t=>t.search.includes(q)||q.split(' ').some(w=>w.length>3&&t.search.includes(w))).slice(0,3);
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:SYSTEM,messages:historial})});
+    const data=await r.json();
+    const reply=data.content?.[0]?.text||'Disculpe, ocurrió un inconveniente. Por favor intente nuevamente.';
+    historial.push({role:'assistant',content:reply});
+    hideTyping();
+    const html=reply.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\*(.*?)\*/g,'<em>$1</em>').replace(/\n/g,'<br>');
+    const row=addMsg('bot',html);
+    if(enc.length>0){
+      const g=document.createElement('div'); g.className='options-grid'; g.style.marginTop='12px';
+      enc.forEach(t=>{ const b=document.createElement('button'); b.className='opt-btn'; b.textContent=t.nombre; b.onclick=()=>verDetalle(t.cat,t.idx); g.appendChild(b); });
+      const mb=document.createElement('button'); mb.className='opt-btn'; mb.textContent='📋 Ver todos los servicios'; mb.onclick=volver; g.appendChild(mb);
+      row.querySelector('.bubble').appendChild(g);
+    }
+  }catch(e){
+    hideTyping();
+    addMsg('bot','Error de conexión. Por favor intente más tarde o contáctenos directamente:<br><br><a class="btn-accion verde" href="https://wa.me/'+WA+'" target="_blank">📲 Escribir por WhatsApp</a>');
+  }finally{
+    document.getElementById('send-btn').disabled=false;
+  }
+}
+
+function enviarMensaje(){
+  const t=inputEl.value.trim(); if(!t)return;
+  inputEl.value=''; inputEl.style.height='auto';
+  addMsg('user',t);
+  if(procesarFlujo(t)) return;
+  enviarAIA(t);
+}
+inputEl.addEventListener('input',()=>{ inputEl.style.height='auto'; inputEl.style.height=Math.min(inputEl.scrollHeight,100)+'px'; });
+inputEl.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();enviarMensaje();} });
+
+// INICIO
+addMsg('bot','Bienvenido a <strong>Esse De Soluciones</strong>. Soy <strong>Esse</strong>, su asistente virtual para trámites gubernamentales.<br><br>Estoy aquí para orientarle de manera ágil y eficiente. ¿En qué le puedo servir hoy?');
+setTimeout(mostrarMenu,700);
+</script>
+</body>
+</html>
